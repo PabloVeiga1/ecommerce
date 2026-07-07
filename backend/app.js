@@ -24,6 +24,8 @@ const produtos = [
     }
 ];
 
+const carrinho = [];
+
 app.get("/",(req,res)=>{
     res.send("API do Ecommerce funcionando!")
 })
@@ -44,6 +46,45 @@ app.get("/produts/:id",(req,res)=>{
     }
 
     res.json(produto)
+})
+
+app.post("/carrinho", (req, res) => {
+    const { produtoId, quantidade } = req.body
+
+    if (!produtoId || !quantidade || quantidade <= 0) {
+        return res.status(400).json({
+            mensagem: "Informe produtoId e quantidade (maior que zero)."
+        })
+    }
+
+    const produto = produtos.find(produto => produto.id === produtoId)
+
+    if (!produto) {
+        return res.status(404).json({
+            mensagem: "Produto nao encontrado."
+        })
+    }
+
+    if (produto.estoque < quantidade) {
+        return res.status(400).json({
+            mensagem: "Estoque insuficiente para essa quantidade."
+        })
+    }
+
+    const itemExistente = carrinho.find(item => item.produtoId === produtoId)
+
+    if (itemExistente) {
+        itemExistente.quantidade += quantidade
+    } else {
+        carrinho.push({ produtoId, quantidade })
+    }
+
+    produto.estoque -= quantidade
+
+    res.status(201).json({
+        mensagem: "Produto adicionado ao carrinho.",
+        carrinho
+    })
 })
 
 app.listen(3000, ()=>{
