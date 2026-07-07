@@ -94,6 +94,20 @@ app.delete("/carrinho/:id", (req, res) => {
     res.json({ mensagem: "Um item foi removido do carrinho." })
 })
 
+app.put("/produtos/:id", (req, res) => {
+    const idParam = Number(req.params.id)
+    const dadosAtualizados = req.body;
+
+    const index = produtos.findIndex(produto => produto.id === idParam)
+
+    if (index > -1) {
+        produtos[index] = { id: idParam, ...dadosAtualizados }
+        return res.status(200).json(produtos[index])
+    } else {
+        return res.status(404).json({ erro: "Produto nao encontrado" })
+    }
+}
+        
 app.listen(3000, () => {
     console.log("Servidor rodando na porta 3000")
 })
