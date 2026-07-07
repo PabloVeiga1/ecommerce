@@ -49,7 +49,6 @@ app.get("/produtos/:id", (req, res) => {
     res.json(produto)
 })
 
-// Nova rota substituindo o antigo POST /carrinho
 app.post("/produtos/:id", (req, res) => {
     const id = Number(req.params.id);
     const produto = produtos.find(produto => produto.id === id)
@@ -73,8 +72,7 @@ app.post("/produtos/:id", (req, res) => {
     carrinho.push(itemCarrinho)
 
     res.json({ 
-        mensagem: "Um item foi adicionado ao carrinho.",
-        carrinho // Adicionado aqui para você conseguir visualizar o carrinho no retorno
+        mensagem: "Um item foi adicionado ao carrinho."
     })
 })
 
