@@ -76,6 +76,24 @@ app.post("/produtos/:id", (req, res) => {
     })
 })
 
+app.delete("/carrinho/:id", (req, res) => {
+    const id = Number(req.params.id);
+    const indice = carrinho.findIndex(item => item.id === id)
+
+    if (indice === -1) {
+        return res.status(404).json({ mensagem: "O produto indicado nao foi adicionado no carrinho." })
+    }
+
+    carrinho.splice(indice, 1)
+
+    const produtoOriginal = produtos.find(produto => produto.id === id)
+    if (produtoOriginal) {
+        produtoOriginal.estoque += 1 
+    }
+
+    res.json({ mensagem: "Um item foi removido do carrinho." })
+})
+
 app.listen(3000, () => {
     console.log("Servidor rodando na porta 3000")
 })
