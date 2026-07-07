@@ -26,20 +26,21 @@ const produtos = [
 
 const carrinho = [];
 
-app.get("/",(req,res)=>{
+app.get("/", (req, res) => {
     res.send("API do Ecommerce funcionando!")
 })
 
-app.get("/produtos",(req,res)=>{
+app.get("/produtos", (req, res) => {
     res.json(produtos)
 })
 
-app.get("/produts/:id",(req,res)=>{
+// Corrigido: era "/produts/:id" e dentro do find estava "produtos.id"
+app.get("/produtos/:id", (req, res) => {
     const id = Number(req.params.id)
 
-    const produto = produtos.find(produto => produtos.id === id)
+    const produto = produtos.find(produto => produto.id === id)
 
-    if(!produto){
+    if (!produto) {
         return res.status(404).json({
             mensagem: "Produto nao encontrado."
         })
@@ -48,45 +49,35 @@ app.get("/produts/:id",(req,res)=>{
     res.json(produto)
 })
 
-app.post("/carrinho", (req, res) => {
-    const { produtoId, quantidade } = req.body
-
-    if (!produtoId || !quantidade || quantidade <= 0) {
-        return res.status(400).json({
-            mensagem: "Informe produtoId e quantidade (maior que zero)."
-        })
-    }
-
-    const produto = produtos.find(produto => produto.id === produtoId)
+// Nova rota substituindo o antigo POST /carrinho
+app.post("/produtos/:id", (req, res) => {
+    const id = Number(req.params.id);
+    const produto = produtos.find(produto => produto.id === id)
 
     if (!produto) {
-        return res.status(404).json({
-            mensagem: "Produto nao encontrado."
-        })
+        return res.status(404).json({ mensagem: "Produto não encontrado." })
     }
 
-    if (produto.estoque < quantidade) {
-        return res.status(400).json({
-            mensagem: "Estoque insuficiente para essa quantidade."
-        })
+    if (produto.estoque === 0) {
+        return res.status(404).json({ mensagem: "O produto encontra-se com o estoque esgotado." })
     }
 
-    const itemExistente = carrinho.find(item => item.produtoId === produtoId)
+    produto.estoque = produto.estoque - 1
 
-    if (itemExistente) {
-        itemExistente.quantidade += quantidade
-    } else {
-        carrinho.push({ produtoId, quantidade })
-    }
+    const itemCarrinho = {
+        id: produto.id,
+        nome: produto.nome,
+        preco: produto.preco
+    };
 
-    produto.estoque -= quantidade
+    carrinho.push(itemCarrinho)
 
-    res.status(201).json({
-        mensagem: "Produto adicionado ao carrinho.",
-        carrinho
+    res.json({ 
+        mensagem: "Um item foi adicionado ao carrinho.",
+        carrinho // Adicionado aqui para você conseguir visualizar o carrinho no retorno
     })
 })
 
-app.listen(3000, ()=>{
+app.listen(3000, () => {
     console.log("Servidor rodando na porta 3000")
 })
